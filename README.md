@@ -1,18 +1,46 @@
-package com.xxxx;
+#react-native-backPressed
 
-import com.facebook.react.ReactActivity;
+使用 npm 源
+npm install react-native-backPressed --save  或者 yarn react-native-backPressed
 
-import com.scodi.backPressed.RNBackPressedModule;
+原生模块导入
+Android Studio
+react-native link react-native-backPressed
 
-public class MainActivity extends ReactActivity {
+使用方法
+1、 MainActivity添加返回键监听
 
-    /**
-     * Returns the name of the main component registered from JavaScript.
-     * 添加返回键监听
-     */
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        RNBackPressedModule.uniqueInstance.sendEvent();
-    }
+@Override
+public void onBackPressed() {
+    super.onBackPressed();
+    RNBackPressedModule.uniqueInstance.sendEvent();
+}
+
+2、js 添加监听函数
+
+import {
+  NativeModules,
+  NativeEventEmitter,
+  BackHandler,
+  ToastAndroid
+} from 'react-native';
+
+const NativeModule = new NativeEventEmitter(NativeModules.SCODI_BACK_ANDROID);
+
+componentWillMount() {
+    this.naiveBackHandler = NativeModule.addListener('RNBackHandler', this.handleBackPress);
+}
+
+componentWillUnmount() {
+    this.naiveBackHandler.remove();
+}
+
+handleBackPress = () => {
+  if (this.lastBackPressed && this.lastBackPressed + 2000 >= Date.now()) {
+    BackHandler.exitApp();
+    return;
+  }
+
+  this.lastBackPressed = Date.now();
+  ToastAndroid.show("再按一次退出应用", ToastAndroid.SHORT);
 }
